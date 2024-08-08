@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   CallControls,
   CallParticipantsList,
@@ -10,7 +10,7 @@ import {
   useCallStateHooks,
 } from '@stream-io/video-react-sdk';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Users, LayoutList } from 'lucide-react';
+import { Users, LayoutList, LinkIcon } from 'lucide-react';
 
 import {
   DropdownMenu,
@@ -25,16 +25,21 @@ import { cn } from '@/lib/utils';
 
 type CallLayoutType = 'grid' | 'speaker-left' | 'speaker-right';
 
+
+
 const MeetingRoom = () => {
   const searchParams = useSearchParams();
   const isPersonalRoom = !!searchParams.get('personal');
   const router = useRouter();
   const [layout, setLayout] = useState<CallLayoutType>('speaker-left');
   const [showParticipants, setShowParticipants] = useState(false);
+  const [currentUrl, setCurrentUrl] = useState('');
   const { useCallCallingState } = useCallStateHooks();
-
-  // for more detail about types of CallingState see: https://getstream.io/video/docs/react/ui-cookbook/ringing-call/#incoming-call-panel
   const callingState = useCallCallingState();
+
+  useEffect(() => {
+    setCurrentUrl(window.location.href);
+  }, []);
 
   if (callingState !== CallingState.JOINED) return <Loader />;
 
@@ -92,6 +97,14 @@ const MeetingRoom = () => {
         <button onClick={() => setShowParticipants((prev) => !prev)}>
           <div className=" cursor-pointer rounded-2xl bg-[#19232d] px-4 py-2 hover:bg-[#4c535b]  ">
             <Users size={20} className="text-white" />
+          </div>
+        </button>
+        <button
+          onClick={() => navigator.clipboard.writeText(currentUrl)}
+          className="cursor-pointer rounded-2xl bg-[#19232d] px-4 py-2 hover:bg-[#4c535b]"
+        >
+          <div className="flex items-center gap-2">
+            <LinkIcon size={20} className="text-white" />
           </div>
         </button>
         {!isPersonalRoom && <EndCallButton />}
